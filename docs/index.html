@@ -3,57 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>simple_cache - Documentation</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-            line-height: 1.6;
-            color: #333;
-        }
-        .logo { text-align: center; margin-bottom: 2rem; }
-        .logo img { max-width: 400px; }
-        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem; }
-        h2 { color: #34495e; margin-top: 2rem; }
-        code { background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
-        pre { background: #f4f4f4; padding: 1rem; border-radius: 5px; overflow-x: auto; }
-        pre code { background: none; padding: 0; }
-        table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-        th, td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; }
-        th { background: #f4f4f4; }
-        a { color: #3498db; }
-        .badge { display: inline-block; padding: 0.25rem 0.5rem; background: #27ae60; color: white; border-radius: 3px; font-size: 0.8em; }
-    </style>
+    <title>simple_cache - In-Memory LRU Cache for Eiffel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
 </head>
 <body>
-    <div class="logo">
-        <img src="images/logo.png" alt="simple_ library logo">
-    </div>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_cache</h1>
+        <p class="tagline">In-Memory LRU Cache with TTL Support for Eiffel</p>
+        <div class="badges">
+            <span class="badge badge-rfc">Service Layer</span>
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+        </div>
+    </header>
 
-    <h1>simple_cache</h1>
-    <p><span class="badge">Service Layer</span></p>
-    <p>In-memory LRU cache with optional TTL support for Eiffel applications. Provides generic key-value storage with automatic eviction and statistics tracking.</p>
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#api">API Reference</a></li>
+            <li><a href="https://github.com/ljr1981/simple_cache">GitHub</a></li>
+        </ul>
+    </nav>
 
-    <h2>Overview</h2>
-    <p>The <code>SIMPLE_CACHE [G]</code> class provides a generic in-memory cache with Least Recently Used (LRU) eviction policy. It supports optional Time-to-Live (TTL) for automatic entry expiration and tracks cache statistics like hits, misses, and evictions.</p>
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                <strong>simple_cache</strong> provides a generic in-memory cache with Least Recently Used (LRU) 
+                eviction policy for Eiffel applications. It supports optional Time-to-Live (TTL) for automatic 
+                entry expiration and tracks cache statistics like hits, misses, and evictions.
+            </p>
+        </section>
 
-    <h2>Features</h2>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td>Generic storage</td><td>STRING keys, any value type</td></tr>
-        <tr><td>LRU eviction</td><td>Automatically removes least recently used entries</td></tr>
-        <tr><td>Optional TTL</td><td>Time-to-live per entry or default</td></tr>
-        <tr><td>Statistics</td><td>Hits, misses, evictions, hit rate</td></tr>
-    </table>
-
-    <h2>Installation</h2>
-    <pre><code>&lt;library name="simple_cache"
-        location="$SIMPLE_CACHE\simple_cache.ecf"/&gt;</code></pre>
-
-    <h2>Quick Start</h2>
-    <pre><code>local
+        <section id="quick-start">
+            <h2>Quick Start</h2>
+            <h3>Installation</h3>
+            <pre><code>&lt;library name="simple_cache" location="$SIMPLE_CACHE\simple_cache.ecf"/&gt;</code></pre>
+            
+            <h3>Basic Usage</h3>
+            <pre><code>local
     cache: SIMPLE_CACHE [STRING]
 do
     -- Create cache with max 100 entries
@@ -71,64 +65,87 @@ do
     -- Check statistics
     print ("Hit rate: " + (cache.hit_rate * 100).out + "%%")
 end</code></pre>
+        </section>
 
-    <h2>TTL Support</h2>
-    <pre><code>-- Cache with default 1-hour TTL
+        <section id="features">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Generic Storage</h4>
+                    <p>STRING keys with any value type via SIMPLE_CACHE [G]</p>
+                </div>
+                <div class="feature-card">
+                    <h4>LRU Eviction</h4>
+                    <p>Automatically removes least recently used entries when full</p>
+                </div>
+                <div class="feature-card">
+                    <h4>TTL Support</h4>
+                    <p>Optional time-to-live per entry or default expiration</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Statistics</h4>
+                    <p>Track hits, misses, evictions, and hit rate</p>
+                </div>
+            </div>
+
+            <h3>TTL (Time-to-Live)</h3>
+            <pre><code>-- Cache with default 1-hour TTL
 create cache.make_with_ttl (100, 3600)
 
 -- Store with custom TTL (5 minutes)
 cache.put_with_ttl ("temp:xyz", data, 300)
 
 -- Entries automatically expire</code></pre>
+        </section>
 
-    <h2>API Reference</h2>
+        <section id="api">
+            <h2>API Reference</h2>
+            
+            <div class="api-section">
+                <h3>make (a_max_size: INTEGER)</h3>
+                <div class="signature">create cache.make (100)</div>
+                <p>Create cache with maximum entries, no expiration.</p>
+                <div class="contracts">
+                    <h4>Require</h4>
+                    <div class="require">positive_size: a_max_size > 0</div>
+                    <h4>Ensure</h4>
+                    <div class="ensure">max_size_set: max_size = a_max_size</div>
+                    <div class="ensure">initially_empty: is_empty</div>
+                </div>
+            </div>
 
-    <h3>Creation</h3>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td><code>make (max_size)</code></td><td>Create cache with max entries</td></tr>
-        <tr><td><code>make_with_ttl (max_size, ttl)</code></td><td>Create with default TTL in seconds</td></tr>
-    </table>
+            <div class="api-section">
+                <h3>make_with_ttl (a_max_size, a_ttl: INTEGER)</h3>
+                <div class="signature">create cache.make_with_ttl (100, 3600)</div>
+                <p>Create cache with maximum entries and default TTL in seconds.</p>
+            </div>
 
-    <h3>Storage</h3>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td><code>put (key, value)</code></td><td>Store value</td></tr>
-        <tr><td><code>put_with_ttl (key, value, ttl)</code></td><td>Store with specific TTL</td></tr>
-        <tr><td><code>remove (key)</code></td><td>Remove entry</td></tr>
-        <tr><td><code>clear</code></td><td>Remove all entries</td></tr>
-    </table>
+            <div class="api-section">
+                <h3>put (a_key: STRING; a_value: G)</h3>
+                <div class="signature">cache.put ("user:123", "Alice")</div>
+                <p>Store value with key. Uses default TTL if set.</p>
+            </div>
 
-    <h3>Access</h3>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td><code>get (key)</code></td><td>Get value (Void if not found/expired)</td></tr>
-        <tr><td><code>has (key)</code></td><td>Check if key exists</td></tr>
-        <tr><td><code>count</code></td><td>Number of entries</td></tr>
-        <tr><td><code>is_empty</code></td><td>Is cache empty?</td></tr>
-    </table>
+            <div class="api-section">
+                <h3>get (a_key: STRING): detachable G</h3>
+                <div class="signature">if attached cache.get ("user:123") as v then ...</div>
+                <p>Retrieve value. Returns Void if not found or expired.</p>
+            </div>
 
-    <h3>Statistics</h3>
-    <table>
-        <tr><th>Feature</th><th>Description</th></tr>
-        <tr><td><code>hits</code></td><td>Cache hit count</td></tr>
-        <tr><td><code>misses</code></td><td>Cache miss count</td></tr>
-        <tr><td><code>evictions</code></td><td>LRU eviction count</td></tr>
-        <tr><td><code>hit_rate</code></td><td>Hit rate (0.0 to 1.0)</td></tr>
-    </table>
+            <h3>Statistics</h3>
+            <table>
+                <tr><th>Feature</th><th>Type</th><th>Description</th></tr>
+                <tr><td><code>hits</code></td><td>INTEGER</td><td>Cache hit count</td></tr>
+                <tr><td><code>misses</code></td><td>INTEGER</td><td>Cache miss count</td></tr>
+                <tr><td><code>evictions</code></td><td>INTEGER</td><td>LRU eviction count</td></tr>
+                <tr><td><code>hit_rate</code></td><td>REAL_64</td><td>Hit rate (0.0 to 1.0)</td></tr>
+            </table>
+        </section>
+    </main>
 
-    <h2>Use Cases</h2>
-    <ul>
-        <li>Session storage with TTL</li>
-        <li>API response caching</li>
-        <li>Database query caching</li>
-        <li>Computed value caching</li>
-    </ul>
-
-    <h2>License</h2>
-    <p>MIT License - Copyright (c) 2024-2025, Larry Rix</p>
-
-    <hr>
-    <p><a href="https://github.com/ljr1981/simple_cache">GitHub Repository</a></p>
+    <footer>
+        <p>Part of the <a href="https://github.com/ljr1981">simple_*</a> library collection</p>
+        <p class="copyright">MIT License - Copyright (c) 2024-2025, Larry Rix</p>
+    </footer>
 </body>
 </html>
