@@ -1,0 +1,8 @@
+# EiffelStudio build artifacts
+EIFGENs/
+
+# Log files
+*.log
+
+# Test output files
+*.tmp
