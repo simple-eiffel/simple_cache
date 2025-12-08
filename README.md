@@ -4,7 +4,7 @@
 
 # simple_cache
 
-**[Documentation](https://ljr1981.github.io/simple_cache/)** | **[GitHub](https://github.com/ljr1981/simple_cache)**
+**[Documentation](https://simple-eiffel.github.io/simple_cache/)** | **[GitHub](https://github.com/simple-eiffel/simple_cache)**
 
 In-memory LRU cache with optional TTL support for Eiffel applications.
 
