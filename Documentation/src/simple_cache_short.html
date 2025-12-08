@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="Simple Cache - In-memory LRU cache with optional TTL support.  Features: - Generic key-value storage (STRING keys, ANY values) - Configurable max size with LRU eviction - Optional TTL (time-to-live) per entry - Thread-safe operations (optional) - Statistics tracking (hits, misses, evictions)  Usage: Tcreate cache.make (100)  -- Max 100 entries Tcache.put (user:123, user_object) Tif attached cache.get (user:123) as user then TT-- Use cached value Tend T With TTL: Tcache.put_with_ttl (session:abc, data, 3600)  -- 1 hour TTL  Statistics: Tprint (cache.hit_rate)  -- 0.85 (85 hit rate)"/>
+<meta name="author" content="Larry Rix with Claude (Anthropic)"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>simple_cache Contracts</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<a class="nav class" href="simple_cache_chart.html">Chart</a>
+<a class="nav class" href="simple_cache_links.html">Relations</a>
+<span class="nav class selected">Contracts</span>
+<span class="nav class goto">Go to: <input name="c" value="simple_cache"></span>
+</div></form><pre><span class="ekeyword">note</span>
+	<span class="eitag">description</span><span class="esymbol">:</span> <span class="estring">&quot;</span><span class="estring">[</span>
+		<span class="estring">Simple Cache - In-memory LRU cache with optional TTL support.</span>
+		
+		<span class="estring">Features:</span>
+		<span class="estring">- Generic key-value storage (STRING keys, ANY values)</span>
+		<span class="estring">- Configurable max size with LRU eviction</span>
+		<span class="estring">- Optional TTL (time-to-live) per entry</span>
+		<span class="estring">- Thread-safe operations (optional)</span>
+		<span class="estring">- Statistics tracking (hits, misses, evictions)</span>
+		
+		<span class="estring">Usage:</span>
+		<span class="estring">	create cache.make (100) &nbsp;-- Max 100 entries</span>
+		<span class="estring">	cache.put (&quot;user:123&quot;, user_object)</span>
+		<span class="estring">	if attached cache.get (&quot;user:123&quot;) as user then</span>
+		<span class="estring">		-- Use cached value</span>
+		<span class="estring">	end</span>
+		<span class="estring">	</span>
+		<span class="estring">With TTL:</span>
+		<span class="estring">	cache.put_with_ttl (&quot;session:abc&quot;, data, 3600) &nbsp;-- 1 hour TTL</span>
+		
+		<span class="estring">Statistics:</span>
+		<span class="estring">	print (cache.hit_rate) &nbsp;-- 0.85 (85% hit rate)</span>
+	<span class="estring">]</span><span class="estring">&quot;</span>
+	<span class="eitag">author</span><span class="esymbol">:</span> <span class="estring">&quot;Larry Rix with Claude (Anthropic)&quot;</span>
+	<span class="eitag">date</span><span class="esymbol">:</span> <span class="estring">&quot;$Date$&quot;</span>
+	<span class="eitag">revision</span><span class="esymbol">:</span> <span class="estring">&quot;$Revision$&quot;</span>
+
+<span class="ekeyword">class</span> <span class="ekeyword">interface</span>
+	<a class="eclass" href="../src/simple_cache_short.html">SIMPLE_CACHE</a> <span class="esymbol">[</span><span class="egeneric">G</span> <span class="esymbol">-&gt;</span> <span class="esymbol">]</span>
+
+<span class="ekeyword">create</span> 
+	<a class="efeature" href="../src/simple_cache_short.html#f_make">make</a><span class="esymbol">,</span>
+	<a class="efeature" href="../src/simple_cache_short.html#f_make_with_ttl">make_with_ttl</a>
+
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Access</span>
+
+	<a name="f_get"></a><a class="efeature" href="../src/simple_cache_short.html#f_get">get</a> <span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_short.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <span class="ekeyword">detachable</span> <span class="egeneric">G</span>
+			<span class="ecomment">--</span><span class="ecomment"> Get value for </span><span class="equoted">a_key</span><span class="ecomment">, or Void if not found or expired.</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">key_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <span class="elocal">a_key</span><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+
+	<a name="f_has"></a><a class="efeature" href="../src/simple_cache_short.html#f_has">has</a> <span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_short.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_short.html">BOOLEAN</a>
+			<span class="ecomment">--</span><span class="ecomment"> Does cache contain unexpired entry for </span><span class="equoted">a_key</span><span class="ecomment">?</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">key_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <span class="elocal">a_key</span><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+
+	<a name="f_count"></a><a class="efeature" href="../src/simple_cache_short.html#f_count">count</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_short.html">INTEGER_32</a>
+			<span class="ecomment">--</span><span class="ecomment"> Number of entries in cache.</span>
+
+	<a name="f_is_empty"></a><a class="efeature" href="../src/simple_cache_short.html#f_is_empty">is_empty</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_short.html">BOOLEAN</a>
+			<span class="ecomment">--</span><span class="ecomment"> Is cache empty?</span>
+
+	<a name="f_is_full"></a><a class="efeature" href="../src/simple_cache_short.html#f_is_full">is_full</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_short.html">BOOLEAN</a>
+			<span class="ecomment">--</span><span class="ecomment"> Is cache at max capacity?</span>
+	
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Element change</span>
+
+	<a name="f_put"></a><a class="efeature" href="../src/simple_cache_short.html#f_put">put</a> <span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_short.html">STRING_8</a><span class="esymbol">;</span> <span class="elocal">a_value</span><span class="esymbol">:</span> <span class="egeneric">G</span><span class="esymbol">)</span>
+			<span class="ecomment">--</span><span class="ecomment"> Store </span><span class="equoted">a_value</span><span class="ecomment"> under </span><span class="equoted">a_key</span><span class="ecomment"> with default TTL.</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">key_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <span class="elocal">a_key</span><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">stored</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_has">has</a><span class="esymbol"> </span><span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">)</span>
+
+	<a name="f_put_with_ttl"></a><a class="efeature" href="../src/simple_cache_short.html#f_put_with_ttl">put_with_ttl</a> <span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_short.html">STRING_8</a><span class="esymbol">;</span> <span class="elocal">a_value</span><span class="esymbol">:</span> <span class="egeneric">G</span><span class="esymbol">;</span> <span class="elocal">a_ttl_seconds</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_short.html">INTEGER_32</a><span class="esymbol">)</span>
+			<span class="ecomment">--</span><span class="ecomment"> Store </span><span class="equoted">a_value</span><span class="ecomment"> under </span><span class="equoted">a_key</span><span class="ecomment"> with specified TTL.</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">key_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <span class="elocal">a_key</span><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+			<span class="etag">positive_ttl</span><span class="esymbol">:</span> <span class="elocal">a_ttl_seconds</span> <a class="esymbol" href="../base/comparable_short.html#f_is_greater">&gt;</a> <span class="enumber">0</span>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">stored</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_has">has</a><span class="esymbol"> </span><span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">)</span>
+	
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Removal</span>
+
+	<a name="f_remove"></a><a class="efeature" href="../src/simple_cache_short.html#f_remove">remove</a> <span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_short.html">STRING_8</a><span class="esymbol">)</span>
+			<span class="ecomment">--</span><span class="ecomment"> Remove entry for </span><span class="equoted">a_key</span><span class="ecomment"> if present.</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">key_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <span class="elocal">a_key</span><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">removed</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <a class="efeature" href="../src/simple_cache_short.html#f_entries">entries</a><span class="edot">.</span><a class="efeature" href="../base/hash_table_short.html#f_has">has</a><span class="esymbol"> </span><span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">)</span>
+
+	<a name="f_clear"></a><a class="efeature" href="../src/simple_cache_short.html#f_clear">clear</a>
+			<span class="ecomment">--</span><span class="ecomment"> Remove all entries.</span>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">emptied</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_is_empty">is_empty</a>
+
+	<a name="f_prune_expired"></a><a class="efeature" href="../src/simple_cache_short.html#f_prune_expired">prune_expired</a>
+			<span class="ecomment">--</span><span class="ecomment"> Remove all expired entries.</span>
+	
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Statistics</span>
+
+	<a name="f_hits"></a><a class="efeature" href="../src/simple_cache_short.html#f_hits">hits</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_short.html">INTEGER_32</a>
+			<span class="ecomment">--</span><span class="ecomment"> Number of cache hits.</span>
+
+	<a name="f_misses"></a><a class="efeature" href="../src/simple_cache_short.html#f_misses">misses</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_short.html">INTEGER_32</a>
+			<span class="ecomment">--</span><span class="ecomment"> Number of cache misses.</span>
+
+	<a name="f_evictions"></a><a class="efeature" href="../src/simple_cache_short.html#f_evictions">evictions</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_short.html">INTEGER_32</a>
+			<span class="ecomment">--</span><span class="ecomment"> Number of entries evicted due to capacity.</span>
+
+	<a name="f_hit_rate"></a><a class="efeature" href="../src/simple_cache_short.html#f_hit_rate">hit_rate</a><span class="esymbol">:</span> <a class="eclass" href="../base/real_64_short.html">REAL_64</a>
+			<span class="ecomment">--</span><span class="ecomment"> Cache hit rate (0.0 to 1.0).</span>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">in_range</span><span class="esymbol">:</span> <span class="ekeyword">Result</span> <a class="esymbol" href="../base/comparable_short.html#f_is_greater_equal">&gt;=</a> <span class="enumber">0.0</span> <a class="ekeyword" href="../base/boolean_short.html#f_conjuncted">and</a> <span class="ekeyword">Result</span> <a class="esymbol" href="../base/comparable_short.html#f_is_less_equal">&lt;=</a> <span class="enumber">1.0</span>
+
+	<a name="f_reset_statistics"></a><a class="efeature" href="../src/simple_cache_short.html#f_reset_statistics">reset_statistics</a>
+			<span class="ecomment">--</span><span class="ecomment"> Reset hit/miss/eviction counters.</span>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">hits_reset</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_hits">hits</a> <span class="esymbol">=</span> <span class="enumber">0</span>
+			<span class="etag">misses_reset</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_misses">misses</a> <span class="esymbol">=</span> <span class="enumber">0</span>
+			<span class="etag">evictions_reset</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_evictions">evictions</a> <span class="esymbol">=</span> <span class="enumber">0</span>
+	
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Configuration</span>
+
+	<a name="f_max_size"></a><a class="efeature" href="../src/simple_cache_short.html#f_max_size">max_size</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_short.html">INTEGER_32</a>
+			<span class="ecomment">--</span><span class="ecomment"> Maximum number of entries.</span>
+
+	<a name="f_default_ttl"></a><a class="efeature" href="../src/simple_cache_short.html#f_default_ttl">default_ttl</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_short.html">INTEGER_32</a>
+			<span class="ecomment">--</span><span class="ecomment"> Default time-to-live in seconds (0 = no expiration).</span>
+
+	<a name="f_set_max_size"></a><a class="efeature" href="../src/simple_cache_short.html#f_set_max_size">set_max_size</a> <span class="esymbol">(</span><span class="elocal">a_new_size</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_short.html">INTEGER_32</a><span class="esymbol">)</span>
+			<span class="ecomment">--</span><span class="ecomment"> Change max size, evicting if necessary.</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">positive_size</span><span class="esymbol">:</span> <span class="elocal">a_new_size</span> <a class="esymbol" href="../base/comparable_short.html#f_is_greater">&gt;</a> <span class="enumber">0</span>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">max_size_updated</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_max_size">max_size</a> <span class="esymbol">=</span> <span class="elocal">a_new_size</span>
+			<span class="etag">within_capacity</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_count">count</a> <a class="esymbol" href="../base/comparable_short.html#f_is_less_equal">&lt;=</a> <a class="efeature" href="../src/simple_cache_short.html#f_max_size">max_size</a>
+	
+<span class="ekeyword">invariant</span>
+	<span class="etag">valid_max_size</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_max_size">max_size</a> <a class="esymbol" href="../base/comparable_short.html#f_is_greater">&gt;</a> <span class="enumber">0</span>
+	<span class="etag">count_within_limit</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_count">count</a> <a class="esymbol" href="../base/comparable_short.html#f_is_less_equal">&lt;=</a> <a class="efeature" href="../src/simple_cache_short.html#f_max_size">max_size</a>
+	<span class="etag">non_negative_hits</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_hits">hits</a> <a class="esymbol" href="../base/comparable_short.html#f_is_greater_equal">&gt;=</a> <span class="enumber">0</span>
+	<span class="etag">non_negative_misses</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_misses">misses</a> <a class="esymbol" href="../base/comparable_short.html#f_is_greater_equal">&gt;=</a> <span class="enumber">0</span>
+	<span class="etag">non_negative_evictions</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_evictions">evictions</a> <a class="esymbol" href="../base/comparable_short.html#f_is_greater_equal">&gt;=</a> <span class="enumber">0</span>
+	<span class="etag">non_negative_ttl</span><span class="esymbol">:</span> <a class="efeature" href="../src/simple_cache_short.html#f_default_ttl">default_ttl</a> <a class="esymbol" href="../base/comparable_short.html#f_is_greater_equal">&gt;=</a> <span class="enumber">0</span>
+
+<span class="ekeyword">end</span> <span class="ecomment">--</span> <span class="ecomment">class </span><a class="eclass" href="../src/simple_cache_short.html">SIMPLE_CACHE</a></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<a class="nav class" href="simple_cache_chart.html">Chart</a>
+<a class="nav class" href="simple_cache_links.html">Relations</a>
+<span class="nav class selected">Contracts</span>
+<span class="nav class goto">Go to: <input name="c" value="simple_cache"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>
+
