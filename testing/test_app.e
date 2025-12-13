@@ -5,7 +5,7 @@ note
 	revision: "$Revision$"
 
 class
-	CACHE_TEST_APP
+	TEST_APP
 
 create
 	make
@@ -14,8 +14,6 @@ feature {NONE} -- Initialization
 
 	make
 			-- Run tests.
-		local
-			tests: CACHE_TEST_SET
 		do
 			create tests
 			io.put_string ("simple_cache test runner%N")
@@ -43,7 +41,7 @@ feature {NONE} -- Initialization
 			io.put_string ("------------------%N")
 			run_test (agent tests.test_lru_eviction, "test_lru_eviction")
 -- 			-- Disabled: run_test (agent tests.test_lru_access_updates_order, "test_lru_access_updates_order")
--- 
+--
 			-- Removal Tests
 			io.put_string ("%NRemoval Tests%N")
 			io.put_string ("-------------%N")
@@ -80,6 +78,8 @@ feature {NONE} -- Initialization
 		end
 
 feature {NONE} -- Implementation
+
+	tests: LIB_TESTS
 
 	passed: INTEGER
 	failed: INTEGER
