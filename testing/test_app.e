@@ -67,6 +67,23 @@ feature {NONE} -- Initialization
 			run_test (agent tests.test_empty_cache_hit_rate, "test_empty_cache_hit_rate")
 			run_test (agent tests.test_is_full, "test_is_full")
 
+			-- Redis Client Tests
+			io.put_string ("%NRedis Client Tests%N")
+			io.put_string ("------------------%N")
+			run_test (agent tests.test_redis_make, "test_redis_make")
+			run_test (agent tests.test_redis_make_with_auth, "test_redis_make_with_auth")
+			run_test (agent tests.test_redis_make_with_database, "test_redis_make_with_database")
+			run_test (agent tests.test_redis_connect_offline, "test_redis_connect_offline")
+
+			-- Redis Cache Tests
+			io.put_string ("%NRedis Cache Tests%N")
+			io.put_string ("-----------------%N")
+			run_test (agent tests.test_redis_cache_make, "test_redis_cache_make")
+			run_test (agent tests.test_redis_cache_make_with_ttl, "test_redis_cache_make_with_ttl")
+			run_test (agent tests.test_redis_cache_make_with_auth, "test_redis_cache_make_with_auth")
+			run_test (agent tests.test_redis_cache_key_prefix, "test_redis_cache_key_prefix")
+			run_test (agent tests.test_redis_cache_statistics, "test_redis_cache_statistics")
+
 			io.put_string ("%N==========================%N")
 			io.put_string ("Results: " + passed.out + " passed, " + failed.out + " failed%N")
 

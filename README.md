@@ -6,16 +6,23 @@
 
 **[Documentation](https://simple-eiffel.github.io/simple_cache/)** | **[GitHub](https://github.com/simple-eiffel/simple_cache)**
 
-In-memory LRU cache with optional TTL support for Eiffel applications.
+In-memory LRU cache with optional TTL support for Eiffel applications. Now includes Redis support for distributed caching.
 
 ## Overview
 
-`simple_cache` provides a generic `SIMPLE_CACHE [G]` class that offers:
+`simple_cache` provides caching solutions for Eiffel:
+
+- **SIMPLE_CACHE [G]** - In-memory LRU cache with TTL
+- **SIMPLE_REDIS** - Low-level Redis client
+- **SIMPLE_REDIS_CACHE** - Redis-backed cache with SIMPLE_CACHE-compatible API
+
+### Features
 
 - **Generic key-value storage** - STRING keys, any value type
 - **LRU eviction** - Automatically removes least recently used entries
 - **Optional TTL** - Time-to-live per entry or default
 - **Statistics tracking** - Hits, misses, evictions, hit rate
+- **Redis support** - Distributed caching via Redis
 
 ## Installation
 
@@ -29,7 +36,8 @@ In-memory LRU cache with optional TTL support for Eiffel applications.
 
 ## Dependencies
 
-- EiffelBase only (no external dependencies)
+- EiffelBase (base, time)
+- EiffelNet (for Redis support)
 
 ## Quick Start
 
@@ -123,6 +131,114 @@ do
 end
 ```
 
+## Redis Cache
+
+For distributed caching, use `SIMPLE_REDIS_CACHE` which provides a similar API to `SIMPLE_CACHE` but stores data in Redis:
+
+```eiffel
+local
+    cache: SIMPLE_REDIS_CACHE
+do
+    -- Create Redis cache
+    create cache.make ("localhost", 6379, 1000)
+
+    -- Connect to Redis
+    if cache.connect then
+        -- Store values (same API as SIMPLE_CACHE)
+        cache.put ("user:123", "{%"name%": %"Alice%"}")
+        cache.put_with_ttl ("session:abc", token, 3600)
+
+        -- Retrieve values
+        if attached cache.get ("user:123") as data then
+            print ("Found: " + data)
+        end
+
+        -- Check existence
+        if cache.has ("session:abc") then
+            print ("Session valid")
+        end
+
+        -- TTL operations
+        cache.set_ttl ("user:123", 7200)  -- 2 hours
+        print ("TTL: " + cache.get_ttl ("user:123").out)
+
+        -- Statistics
+        print ("Hit rate: " + (cache.hit_rate * 100).out + "%%")
+
+        cache.disconnect
+    end
+end
+```
+
+### Redis with Authentication
+
+```eiffel
+local
+    cache: SIMPLE_REDIS_CACHE
+do
+    create cache.make_with_auth ("redis.example.com", 6379, 1000, "password")
+    if cache.connect then
+        -- Use cache...
+    end
+end
+```
+
+### Key Prefixing (Namespacing)
+
+```eiffel
+local
+    cache: SIMPLE_REDIS_CACHE
+do
+    create cache.make ("localhost", 6379, 1000)
+    cache.set_key_prefix ("myapp:")
+
+    if cache.connect then
+        cache.put ("user:1", data)  -- Stored as "myapp:user:1" in Redis
+    end
+end
+```
+
+### Low-Level Redis Client
+
+For direct Redis commands, use `SIMPLE_REDIS`:
+
+```eiffel
+local
+    redis: SIMPLE_REDIS
+do
+    create redis.make ("localhost", 6379)
+    if redis.connect then
+        -- String commands
+        redis.set ("key", "value")
+        if attached redis.get ("key") as v then
+            print (v)
+        end
+
+        -- With expiration
+        redis.setex ("temp", 60, "expires in 1 minute")
+
+        -- Key commands
+        if redis.exists ("key") then
+            redis.expire ("key", 3600)
+            print ("TTL: " + redis.ttl ("key").out)
+        end
+        redis.del ("key")
+
+        -- Atomic operations
+        redis.incr ("counter")
+        redis.incrby ("counter", 10)
+
+        -- Server commands
+        if redis.ping then
+            print ("Connected!")
+        end
+        print ("Keys: " + redis.dbsize.out)
+
+        redis.disconnect
+    end
+end
+```
+
 ## API Reference
 
 ### Creation
@@ -169,6 +285,42 @@ end
 | `evictions: INTEGER` | LRU eviction count |
 | `hit_rate: REAL_64` | Hit rate (0.0 to 1.0) |
 | `reset_statistics` | Reset all counters |
+
+### Redis Cache API
+
+| Feature | Description |
+|---------|-------------|
+| `make (host, port, max_size)` | Create Redis cache |
+| `make_with_ttl (host, port, max_size, ttl)` | Create with default TTL |
+| `make_with_auth (host, port, max_size, password)` | Create with authentication |
+| `connect: BOOLEAN` | Connect to Redis |
+| `disconnect` | Disconnect from Redis |
+| `is_connected: BOOLEAN` | Connection status |
+| `set_key_prefix (prefix)` | Set key namespace prefix |
+| `set_ttl (key, seconds): BOOLEAN` | Set TTL on existing key |
+| `get_ttl (key): INTEGER` | Get remaining TTL |
+| `ping: BOOLEAN` | Ping Redis server |
+| `server_info: STRING` | Get Redis INFO |
+
+### Redis Client API (SIMPLE_REDIS)
+
+| Feature | Description |
+|---------|-------------|
+| `get (key): STRING` | Get value |
+| `set (key, value): BOOLEAN` | Set value |
+| `setex (key, seconds, value): BOOLEAN` | Set with expiration |
+| `setnx (key, value): BOOLEAN` | Set if not exists |
+| `del (key): BOOLEAN` | Delete key |
+| `exists (key): BOOLEAN` | Check key exists |
+| `expire (key, seconds): BOOLEAN` | Set expiration |
+| `ttl (key): INTEGER` | Get TTL (-1 = no expire, -2 = not found) |
+| `incr (key): INTEGER` | Increment by 1 |
+| `incrby (key, amount): INTEGER` | Increment by amount |
+| `decr (key): INTEGER` | Decrement by 1 |
+| `keys (pattern): LIST [STRING]` | Find keys by pattern |
+| `ping: BOOLEAN` | Ping server |
+| `dbsize: INTEGER` | Key count |
+| `flushdb: BOOLEAN` | Delete all keys |
 
 ## Use Cases
 

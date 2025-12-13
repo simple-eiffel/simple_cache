@@ -256,4 +256,105 @@ feature -- Edge Cases
 			check now_full: cache.is_full end
 		end
 
+feature -- Redis Client Tests
+
+	test_redis_make
+			-- Test Redis client creation.
+		local
+			redis: SIMPLE_REDIS
+		do
+			create redis.make ("localhost", 6379)
+			check host_set: redis.host.same_string ("localhost") end
+			check port_set: redis.port = 6379 end
+			check not_connected: not redis.is_connected end
+		end
+
+	test_redis_make_with_auth
+			-- Test Redis client with authentication.
+		local
+			redis: SIMPLE_REDIS
+		do
+			create redis.make_with_auth ("localhost", 6379, "secret")
+			check host_set: redis.host.same_string ("localhost") end
+			check password_set: attached redis.password as p and then p.same_string ("secret") end
+		end
+
+	test_redis_make_with_database
+			-- Test Redis client with database selection.
+		local
+			redis: SIMPLE_REDIS
+		do
+			create redis.make_with_database ("localhost", 6379, 5)
+			check database_set: redis.database = 5 end
+		end
+
+	test_redis_connect_offline
+			-- Test Redis connect when server unavailable.
+		local
+			redis: SIMPLE_REDIS
+			l_connected: BOOLEAN
+		do
+			-- Use unlikely port to test connection failure
+			create redis.make ("localhost", 59999)
+			l_connected := redis.connect
+			check not_connected: not l_connected end
+			check has_error: redis.has_error end
+		end
+
+feature -- Redis Cache Tests
+
+	test_redis_cache_make
+			-- Test Redis cache creation.
+		local
+			cache: SIMPLE_REDIS_CACHE
+		do
+			create cache.make ("localhost", 6379, 1000)
+			check max_size_set: cache.max_size = 1000 end
+			check no_ttl: cache.default_ttl = 0 end
+			check not_connected: not cache.is_connected end
+		end
+
+	test_redis_cache_make_with_ttl
+			-- Test Redis cache with TTL.
+		local
+			cache: SIMPLE_REDIS_CACHE
+		do
+			create cache.make_with_ttl ("localhost", 6379, 500, 3600)
+			check max_size_set: cache.max_size = 500 end
+			check ttl_set: cache.default_ttl = 3600 end
+		end
+
+	test_redis_cache_make_with_auth
+			-- Test Redis cache with authentication.
+		local
+			cache: SIMPLE_REDIS_CACHE
+		do
+			create cache.make_with_auth ("localhost", 6379, 1000, "password")
+			check max_size_set: cache.max_size = 1000 end
+		end
+
+	test_redis_cache_key_prefix
+			-- Test key prefix functionality.
+		local
+			cache: SIMPLE_REDIS_CACHE
+		do
+			create cache.make ("localhost", 6379, 1000)
+			check empty_prefix: cache.key_prefix.is_empty end
+			cache.set_key_prefix ("myapp:")
+			check prefix_set: cache.key_prefix.same_string ("myapp:") end
+		end
+
+	test_redis_cache_statistics
+			-- Test Redis cache statistics tracking.
+		local
+			cache: SIMPLE_REDIS_CACHE
+		do
+			create cache.make ("localhost", 6379, 1000)
+			check hits_zero: cache.hits = 0 end
+			check misses_zero: cache.misses = 0 end
+			check hit_rate_zero: cache.hit_rate = 0.0 end
+			cache.reset_statistics
+			check still_zero: cache.hits = 0 and cache.misses = 0 end
+		end
+
 end

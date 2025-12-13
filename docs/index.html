@@ -13,7 +13,7 @@
             <img src="images/logo.png" alt="simple_* logo" class="logo">
         </div>
         <h1>simple_cache</h1>
-        <p class="tagline">In-Memory LRU Cache with TTL Support for Eiffel</p>
+        <p class="tagline">In-Memory LRU Cache with TTL and Redis Support for Eiffel</p>
         <div class="badges">
             <span class="badge badge-rfc">Service Layer</span>
             <span class="badge badge-version">v1.0.0</span>
@@ -86,6 +86,14 @@ end</code></pre>
                     <h4>Statistics</h4>
                     <p>Track hits, misses, evictions, and hit rate</p>
                 </div>
+                <div class="feature-card">
+                    <h4>Redis Support</h4>
+                    <p>SIMPLE_REDIS_CACHE for distributed caching via Redis</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Redis Client</h4>
+                    <p>SIMPLE_REDIS for low-level Redis commands</p>
+                </div>
             </div>
 
             <h3>TTL (Time-to-Live)</h3>
@@ -96,6 +104,36 @@ create cache.make_with_ttl (100, 3600)
 cache.put_with_ttl ("temp:xyz", data, 300)
 
 -- Entries automatically expire</code></pre>
+
+            <h3>Redis Cache</h3>
+            <pre><code>local
+    cache: SIMPLE_REDIS_CACHE
+do
+    create cache.make ("localhost", 6379, 1000)
+    if cache.connect then
+        cache.put ("user:123", user_json)
+        if attached cache.get ("user:123") as data then
+            print (data)
+        end
+        cache.disconnect
+    end
+end</code></pre>
+
+            <h3>Redis Client</h3>
+            <pre><code>local
+    redis: SIMPLE_REDIS
+do
+    create redis.make ("localhost", 6379)
+    if redis.connect then
+        redis.set ("key", "value")
+        redis.setex ("temp", 60, "expires in 1 min")
+        redis.incr ("counter")
+        if redis.ping then
+            print ("Connected!")
+        end
+        redis.disconnect
+    end
+end</code></pre>
         </section>
 
         <section id="api">
