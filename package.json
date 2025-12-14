@@ -1,0 +1,9 @@
+{
+  "name": "simple_cache",
+  "version": "0.1.0",
+  "description": "Simple Cache - In-memory LRU cache with TTL support",
+  "author": "Larry Rix",
+  "license": "MIT",
+  "category": "database",
+  "keywords": ["cache", "memory", "ttl", "lru"]
+}
