@@ -313,6 +313,106 @@ feature -- Key Commands
 			end
 		end
 
+feature -- List Commands
+
+	lpush (a_key, a_value: STRING): INTEGER
+			-- Prepend value to list. Returns list length.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+		do
+			Result := send_command_integer (<<"LPUSH", a_key, a_value>>)
+		end
+
+	rpush (a_key, a_value: STRING): INTEGER
+			-- Append value to list. Returns list length.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+		do
+			Result := send_command_integer (<<"RPUSH", a_key, a_value>>)
+		end
+
+	lpop (a_key: STRING): detachable STRING
+			-- Remove and return first element of list.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+		do
+			Result := send_command_string (<<"LPOP", a_key>>)
+		end
+
+	rpop (a_key: STRING): detachable STRING
+			-- Remove and return last element of list.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+		do
+			Result := send_command_string (<<"RPOP", a_key>>)
+		end
+
+	blpop (a_key: STRING; a_timeout: INTEGER): detachable STRING
+			-- Blocking left pop with timeout in seconds.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+			non_negative_timeout: a_timeout >= 0
+		local
+			l_response: detachable STRING
+		do
+			l_response := send_command_string (<<"BLPOP", a_key, a_timeout.out>>)
+			-- BLPOP returns array [key, value], we want the value
+			if attached l_response as r and then not r.is_empty then
+				Result := r
+			end
+		end
+
+	llen (a_key: STRING): INTEGER
+			-- Get list length.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+		do
+			Result := send_command_integer (<<"LLEN", a_key>>)
+		end
+
+	lindex (a_key: STRING; a_index: INTEGER): detachable STRING
+			-- Get element at index.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+		do
+			Result := send_command_string (<<"LINDEX", a_key, a_index.out>>)
+		end
+
+	ltrim (a_key: STRING; a_start, a_stop: INTEGER): BOOLEAN
+			-- Trim list to specified range.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+		do
+			Result := send_command_ok (<<"LTRIM", a_key, a_start.out, a_stop.out>>)
+		end
+
+	lrem (a_key: STRING; a_count: INTEGER; a_value: STRING): INTEGER
+			-- Remove elements from list. Returns number removed.
+		require
+			connected: is_connected
+			key_not_empty: not a_key.is_empty
+		do
+			Result := send_command_integer (<<"LREM", a_key, a_count.out, a_value>>)
+		end
+
+	rpoplpush (a_source, a_destination: STRING): detachable STRING
+			-- Pop from source and push to destination atomically.
+		require
+			connected: is_connected
+			source_not_empty: not a_source.is_empty
+			destination_not_empty: not a_destination.is_empty
+		do
+			Result := send_command_string (<<"RPOPLPUSH", a_source, a_destination>>)
+		end
+
 feature -- Server Commands
 
 	ping: BOOLEAN
