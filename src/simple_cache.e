@@ -264,7 +264,7 @@ feature {NONE} -- Implementation
 	entries: HASH_TABLE [G, STRING]
 			-- Key-value storage.
 
-	expiration_times: HASH_TABLE [DATE_TIME, STRING]
+	expiration_times: HASH_TABLE [SIMPLE_DATE_TIME, STRING]
 			-- Expiration time per key (only for entries with TTL).
 
 	access_order: ARRAYED_LIST [STRING]
@@ -273,7 +273,7 @@ feature {NONE} -- Implementation
 	put_internal (a_key: STRING; a_value: G; a_ttl_seconds: INTEGER)
 			-- Internal put with optional TTL.
 		local
-			l_expiration: DATE_TIME
+			l_expiration: SIMPLE_DATE_TIME
 		do
 			-- If key exists, remove from access order
 			if entries.has (a_key) then
@@ -292,7 +292,7 @@ feature {NONE} -- Implementation
 			-- Set expiration if TTL specified
 			if a_ttl_seconds > 0 then
 				create l_expiration.make_now
-				l_expiration.second_add (a_ttl_seconds)
+				l_expiration := l_expiration.plus_seconds (a_ttl_seconds.to_integer_64)
 				expiration_times.force (l_expiration, a_key)
 			else
 				expiration_times.remove (a_key)
@@ -336,7 +336,7 @@ feature {NONE} -- Implementation
 	is_expired (a_key: STRING): BOOLEAN
 			-- Has entry for `a_key' expired?
 		local
-			l_now: DATE_TIME
+			l_now: SIMPLE_DATE_TIME
 		do
 			if expiration_times.has (a_key) then
 				create l_now.make_now
