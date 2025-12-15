@@ -1,8 +1,26 @@
-# EiffelStudio build artifacts
+# Eiffel build artifacts
 EIFGENs/
+Documentation/
 
-# Log files
-*.log
+# Compiled files
+*.melted
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
 
-# Test output files
-*.tmp
+# Backup files
+*.swp
+*.bak
+*~
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
