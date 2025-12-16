@@ -39,7 +39,41 @@ In-memory LRU cache with optional TTL support for Eiffel applications. Now inclu
 - EiffelBase (base, time)
 - EiffelNet (for Redis support)
 
-## Quick Start
+## Quick Start (Zero-Configuration)
+
+Use `SIMPLE_CACHE_QUICK` for the simplest possible caching:
+
+```eiffel
+local
+    cache: SIMPLE_CACHE_QUICK
+    value: detachable STRING
+do
+    create cache.make  -- default 1000 entries
+
+    -- Basic get/set
+    cache.set ("user:123", user_json)
+    value := cache.get ("user:123")
+
+    -- With TTL (expires in 1 hour)
+    cache.set_for ("session", token, 3600)
+
+    -- The killer feature: get-or-compute
+    value := cache.remember ("expensive_key", agent compute_value)
+    -- Returns cached value if exists, otherwise computes and caches
+
+    -- With TTL
+    value := cache.remember_for ("data", 300, agent fetch_data)
+
+    -- Counters
+    cache.increment ("page_views")
+    cache.increment_by ("score", 10)
+
+    -- Statistics
+    print (cache.stats)  -- "Hits: 42, Misses: 8, Rate: 84%"
+end
+```
+
+## Standard API (Full Control)
 
 ```eiffel
 local

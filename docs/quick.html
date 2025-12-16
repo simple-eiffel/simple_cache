@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMPLE_CACHE_QUICK - Zero-Configuration Caching</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>SIMPLE_CACHE_QUICK</h1>
+        <p class="tagline">Zero-Configuration Caching for Beginners</p>
+        <div class="badges">
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#api">API Reference</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                <strong>SIMPLE_CACHE_QUICK</strong> provides the simplest possible caching with the
+                powerful <code>remember</code> pattern - get from cache or compute and store automatically.
+            </p>
+            <p>For full control including Redis support, use SIMPLE_CACHE directly.</p>
+        </section>
+
+        <section id="quick-start">
+            <h2>Quick Start</h2>
+<pre><code><span class="keyword">local</span>
+    cache: <span class="type">SIMPLE_CACHE_QUICK</span>
+    value: <span class="keyword">detachable</span> <span class="type">STRING</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> cache.make  <span class="comment">-- default 1000 entries</span>
+
+    <span class="comment">-- Basic get/set</span>
+    cache.set (<span class="string">"user:123"</span>, user_json)
+    value := cache.get (<span class="string">"user:123"</span>)
+
+    <span class="comment">-- With TTL (expires in 1 hour)</span>
+    cache.set_for (<span class="string">"session"</span>, token, 3600)
+
+    <span class="comment">-- The killer feature: get-or-compute</span>
+    value := cache.remember (<span class="string">"expensive_key"</span>, <span class="keyword">agent</span> compute_value)
+    <span class="comment">-- Returns cached value if exists, otherwise computes and caches</span>
+
+    <span class="comment">-- With TTL</span>
+    value := cache.remember_for (<span class="string">"data"</span>, 300, <span class="keyword">agent</span> fetch_data)
+
+    <span class="comment">-- Counters</span>
+    cache.increment (<span class="string">"page_views"</span>)
+    cache.increment_by (<span class="string">"score"</span>, 10)
+
+    <span class="comment">-- Statistics</span>
+    print (cache.stats)  <span class="comment">-- "Hits: 42, Misses: 8, Rate: 84%"</span>
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="remember-pattern">
+            <h2>The Remember Pattern</h2>
+            <p>This is the most useful caching pattern - eliminates boilerplate cache checking:</p>
+<pre><code><span class="comment">-- Without remember (verbose)</span>
+value := cache.get (<span class="string">"key"</span>)
+<span class="keyword">if</span> value = <span class="keyword">Void</span> <span class="keyword">then</span>
+    value := expensive_computation
+    cache.set (<span class="string">"key"</span>, value)
+<span class="keyword">end</span>
+
+<span class="comment">-- With remember (one-liner)</span>
+value := cache.remember (<span class="string">"key"</span>, <span class="keyword">agent</span> expensive_computation)</code></pre>
+        </section>
+
+        <section id="api">
+            <h2>API Reference</h2>
+
+            <h3>Basic Operations</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>get (key)</code></td><td>Get cached value</td></tr>
+                <tr><td><code>set (key, value)</code></td><td>Store value</td></tr>
+                <tr><td><code>set_for (key, value, ttl)</code></td><td>Store with TTL in seconds</td></tr>
+                <tr><td><code>delete (key)</code></td><td>Remove entry</td></tr>
+                <tr><td><code>has (key)</code></td><td>Check if key exists</td></tr>
+                <tr><td><code>clear</code></td><td>Clear all entries</td></tr>
+            </table>
+
+            <h3>Remember Pattern</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>remember (key, agent)</code></td><td>Get or compute and cache</td></tr>
+                <tr><td><code>remember_for (key, ttl, agent)</code></td><td>Get or compute with TTL</td></tr>
+            </table>
+
+            <h3>Counters</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>increment (key)</code></td><td>Increment by 1</td></tr>
+                <tr><td><code>increment_by (key, n)</code></td><td>Increment by n</td></tr>
+                <tr><td><code>decrement (key)</code></td><td>Decrement by 1</td></tr>
+            </table>
+
+            <h3>Statistics</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>stats</code></td><td>Formatted statistics string</td></tr>
+                <tr><td><code>hit_rate</code></td><td>Cache hit rate (0.0-1.0)</td></tr>
+                <tr><td><code>count</code></td><td>Number of cached entries</td></tr>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>Part of the <a href="https://github.com/simple-eiffel">Simple Eiffel</a> ecosystem</p>
+    </footer>
+</body>
+</html>
