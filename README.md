@@ -27,11 +27,11 @@ In-memory LRU cache with optional TTL support for Eiffel applications. Now inclu
 ## Installation
 
 1. Clone the repository
-2. Set environment variable: `SIMPLE_CACHE=D:\path\to\simple_cache`
+2. Set the ecosystem environment variable (one-time setup for all simple_* libraries): `SIMPLE_EIFFEL=D:\prod`
 3. Add to your ECF:
 
 ```xml
-<library name="simple_cache" location="$SIMPLE_CACHE\simple_cache.ecf"/>
+<library name="simple_cache" location="$SIMPLE_EIFFEL/simple_cache/simple_cache.ecf"/>
 ```
 
 ## Dependencies
