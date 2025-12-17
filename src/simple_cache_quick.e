@@ -43,7 +43,7 @@ feature {NONE} -- Initialization
 			positive_size: a_max_size > 0
 		do
 			create cache.make (a_max_size)
-			create logger.make ("cache_quick")
+			create logger.make
 		ensure
 			cache_exists: cache /= Void
 		end
