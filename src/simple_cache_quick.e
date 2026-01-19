@@ -147,8 +147,8 @@ feature -- Bulk Operations
 		require
 			pairs_not_empty: a_pairs.count > 0
 		do
-			across a_pairs as p loop
-				cache.put (p.key, p.value)
+			across a_pairs as ic_p loop
+				cache.put (ic_p.key, ic_p.value)
 			end
 		end
 
@@ -158,8 +158,8 @@ feature -- Bulk Operations
 			keys_not_empty: a_keys.count > 0
 		do
 			create Result.make (a_keys.count)
-			across a_keys as k loop
-				Result.extend ([k, cache.get (k)])
+			across a_keys as ic_k loop
+				Result.extend ([ic_k, cache.get (ic_k)])
 			end
 		ensure
 			result_exists: Result /= Void
@@ -171,8 +171,8 @@ feature -- Bulk Operations
 		require
 			keys_not_empty: a_keys.count > 0
 		do
-			across a_keys as k loop
-				cache.remove (k)
+			across a_keys as ic_k loop
+				cache.remove (ic_k)
 			end
 		end
 
