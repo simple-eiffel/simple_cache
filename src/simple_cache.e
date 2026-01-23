@@ -1,33 +1,37 @@
 note
 	description: "[
 		Simple Cache - In-memory LRU cache with optional TTL support.
-		
+
 		Features:
 		- Generic key-value storage (STRING keys, ANY values)
 		- Configurable max size with LRU eviction
 		- Optional TTL (time-to-live) per entry
 		- Thread-safe operations (optional)
 		- Statistics tracking (hits, misses, evictions)
-		
+
 		Usage:
 			create cache.make (100)  -- Max 100 entries
 			cache.put ("user:123", user_object)
 			if attached cache.get ("user:123") as user then
 				-- Use cached value
 			end
-			
+
 		With TTL:
 			cache.put_with_ttl ("session:abc", data, 3600)  -- 1 hour TTL
-		
+
 		Statistics:
 			print (cache.hit_rate)  -- 0.85 (85% hit rate)
+
+		Model Queries (for specification):
+			model_keys: MML_SEQUENCE [STRING] -- LRU order (most recent last)
+			model_entries: MML_MAP [STRING, G] -- key-value mappings
 	]"
 	author: "Larry Rix with Claude (Anthropic)"
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	SIMPLE_CACHE [G]
+	SIMPLE_CACHE [G -> detachable separate ANY]
 
 create
 	make,
@@ -51,6 +55,7 @@ feature {NONE} -- Initialization
 		ensure
 			max_size_set: max_size = a_max_size
 			initially_empty: count = 0
+			model_empty: model_keys.is_empty and model_entries.is_empty
 		end
 
 	make_with_ttl (a_max_size: INTEGER; a_default_ttl: INTEGER)
@@ -64,6 +69,7 @@ feature {NONE} -- Initialization
 		ensure
 			max_size_set: max_size = a_max_size
 			ttl_set: default_ttl = a_default_ttl
+			model_empty: model_keys.is_empty and model_entries.is_empty
 		end
 
 feature -- Access
@@ -102,24 +108,32 @@ feature -- Access
 					Result := True
 				end
 			end
+		ensure
+			consistent_with_model: Result implies model_entries.domain [a_key]
 		end
 
 	count: INTEGER
 			-- Number of entries in cache.
 		do
 			Result := entries.count
+		ensure
+			consistent_with_model: Result = model_keys.count
 		end
 
 	is_empty: BOOLEAN
 			-- Is cache empty?
 		do
 			Result := count = 0
+		ensure
+			definition: Result = model_keys.is_empty
 		end
 
 	is_full: BOOLEAN
 			-- Is cache at max capacity?
 		do
 			Result := count >= max_size
+		ensure
+			definition: Result = (model_keys.count >= max_size)
 		end
 
 feature -- Element change
@@ -135,7 +149,11 @@ feature -- Element change
 				put_internal (a_key, a_value, 0)
 			end
 		ensure
-			stored: has (a_key)
+			stored: entries.has (a_key)
+			key_in_model: model_entries.domain [a_key]
+			key_in_sequence: model_keys.has (a_key)
+			key_is_most_recent: model_keys.last.same_string (a_key)
+			capacity_maintained: model_keys.count <= max_size
 		end
 
 	put_with_ttl (a_key: STRING; a_value: G; a_ttl_seconds: INTEGER)
@@ -146,7 +164,11 @@ feature -- Element change
 		do
 			put_internal (a_key, a_value, a_ttl_seconds)
 		ensure
-			stored: has (a_key)
+			stored: entries.has (a_key)
+			key_in_model: model_entries.domain [a_key]
+			key_in_sequence: model_keys.has (a_key)
+			key_is_most_recent: model_keys.last.same_string (a_key)
+			capacity_maintained: model_keys.count <= max_size
 		end
 
 feature -- Removal
@@ -159,10 +181,12 @@ feature -- Removal
 			if entries.has (a_key) then
 				entries.remove (a_key)
 				expiration_times.remove (a_key)
-				access_order.prune_all (a_key)
+				prune_key_from_access_order (a_key)
 			end
 		ensure
 			removed: not entries.has (a_key)
+			key_not_in_model: not model_entries.domain [a_key]
+			key_not_in_sequence: not model_keys.has (a_key)
 		end
 
 	clear
@@ -173,6 +197,7 @@ feature -- Removal
 			access_order.wipe_out
 		ensure
 			emptied: is_empty
+			model_empty: model_keys.is_empty and model_entries.is_empty
 		end
 
 	prune_expired
@@ -198,6 +223,44 @@ feature -- Removal
 			loop
 				remove (l_keys_to_remove.item)
 				l_keys_to_remove.forth
+			end
+		end
+
+feature -- Model queries (for specification)
+
+	model_keys: MML_SEQUENCE [STRING]
+			-- Keys in LRU access order (most recent at end).
+			-- This is the model view of access_order.
+		local
+			i: INTEGER
+		do
+			create Result
+			from
+				i := 1
+			until
+				i > access_order.count
+			loop
+				Result := Result & access_order.i_th (i)
+				i := i + 1
+			end
+		end
+
+	model_entries: MML_MAP [STRING, G]
+			-- Key-value mappings as a mathematical map.
+			-- This is the model view of entries.
+		local
+			l_keys: ARRAY [STRING]
+			i: INTEGER
+		do
+			create Result
+			l_keys := entries.current_keys
+			from
+				i := l_keys.lower
+			until
+				i > l_keys.upper
+			loop
+				Result := Result.updated (l_keys [i], entries.definite_item (l_keys [i]))
+				i := i + 1
 			end
 		end
 
@@ -257,6 +320,7 @@ feature -- Configuration
 		ensure
 			max_size_updated: max_size = a_new_size
 			within_capacity: count <= max_size
+			model_bounded: model_keys.count <= max_size
 		end
 
 feature {NONE} -- Implementation
@@ -277,7 +341,7 @@ feature {NONE} -- Implementation
 		do
 			-- If key exists, remove from access order
 			if entries.has (a_key) then
-				access_order.prune_all (a_key)
+				prune_key_from_access_order (a_key)
 			else
 				-- New entry, may need to evict
 				if is_full then
@@ -297,6 +361,11 @@ feature {NONE} -- Implementation
 			else
 				expiration_times.remove (a_key)
 			end
+		ensure
+			key_stored: entries.has (a_key)
+			key_in_access_order: access_order.has (a_key)
+			key_is_last: access_order.last.same_string (a_key)
+			within_capacity: entries.count <= max_size
 		end
 
 	evict_lru
@@ -311,6 +380,8 @@ feature {NONE} -- Implementation
 				remove (l_key)
 				evictions := evictions + 1
 			end
+		ensure
+			count_decreased: count = old count - 1
 		end
 
 	evict_to_capacity
@@ -329,8 +400,32 @@ feature {NONE} -- Implementation
 	update_access_order (a_key: STRING)
 			-- Move `a_key' to end of access list (most recently used).
 		do
-			access_order.prune_all (a_key)
+			prune_key_from_access_order (a_key)
 			access_order.extend (a_key)
+		ensure
+			key_is_last: access_order.last.same_string (a_key)
+		end
+
+	prune_key_from_access_order (a_key: STRING)
+			-- Remove `a_key' from access_order using string comparison.
+		local
+			i: INTEGER
+			l_found: BOOLEAN
+		do
+			from
+				i := 1
+				l_found := False
+			until
+				i > access_order.count or l_found
+			loop
+				if access_order.i_th (i).same_string (a_key) then
+					access_order.go_i_th (i)
+					access_order.remove
+					l_found := True
+				else
+					i := i + 1
+				end
+			end
 		end
 
 	is_expired (a_key: STRING): BOOLEAN
@@ -354,5 +449,9 @@ invariant
 	non_negative_misses: misses >= 0
 	non_negative_evictions: evictions >= 0
 	non_negative_ttl: default_ttl >= 0
+	-- Model-based invariants
+	capacity_bounded: model_keys.count <= max_size
+	keys_entries_same_count: access_order.count = entries.count
+	hit_rate_valid: hit_rate >= 0.0 and hit_rate <= 1.0
 
 end
